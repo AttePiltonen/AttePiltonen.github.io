@@ -42,10 +42,10 @@ nav a {
   text-decoration: none;
 }
 
-nav a:hover {
+/* nav a:hover {
   color: #2464a8;
 }
-
+ */
 /* Sidebar styles */
 aside {
   width: 200px;
