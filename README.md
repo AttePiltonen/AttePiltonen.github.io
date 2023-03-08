@@ -1,1 +1,1 @@
-Hi! Welcome to the repo for my personal website.
+Hi there! Welcome to the repository for my personal website.
