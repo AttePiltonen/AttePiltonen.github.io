@@ -1,1 +1,1 @@
-Hi there! Welcome to the repository for my personal website. This website serves as a practicing ground for website development for myself, while also being a way to 
+Hi there! Welcome to the repository for my personal website. This website serves as a practicing ground for website development for myself, while also being a way to showcase my scientific publications, research interests, as well as coding projects in the future.
