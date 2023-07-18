@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>MY NAME - BrowserSnake</title>
+	<title>Atte Piltonen - BrowserSnake</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 	<link rel="stylesheet" href="style.css">
@@ -43,7 +43,7 @@
 </head>
 <body>
 	<nav class="navbar navbar-expand-md bg-dark navbar-dark">
-		<a class="navbar-brand" href="index.html">MY NAME</a>
+		<a class="navbar-brand" href="index.html">Atte Piltonen</a>
 		<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
 			<span class="navbar-toggler-icon"></span>
 		</button>
@@ -95,11 +95,26 @@
 
         function randomApple() {
             let maxPos = $('#game-board').width() / 20 - 1;
-            return {
-                top: Math.floor(Math.random() * maxPos) * 20,
-                left: Math.floor(Math.random() * maxPos) * 20
-            };
-        }
+            let newApple = {};
+            let collision;
+
+            do {
+                collision = false;
+                newApple = {
+                    top: Math.floor(Math.random() * maxPos) * 20,
+                    left: Math.floor(Math.random() * maxPos) * 20
+                };
+
+                for (let dot of snake) {
+                    if (dot.top === newApple.top && dot.left === newApple.left) {
+                        collision = true;
+                        break;
+                    }
+                }
+            } while (collision);
+
+            return newApple;
+                }
 
         function updateSnake() {
             let head = Object.assign({}, snake[0]); // copy head
