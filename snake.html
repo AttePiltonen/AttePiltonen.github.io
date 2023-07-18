@@ -1,16 +1,31 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Atte Piltonen BrowserSnake</title>
+	<title>MY NAME - BrowserSnake</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 	<link rel="stylesheet" href="style.css">
 	<style>
+		body {
+			display: flex;
+			flex-direction: column;
+			min-height: 100vh;
+		}
+		.container {
+			flex-grow: 1;
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+		}
 		#game-board {
 			position: relative;
 			height: 300px;
 			width: 300px;
 			border: 1px solid black;
+			margin-top: 60px; /* Increase this to add more space */
+			margin-right: auto;
+			margin-bottom: 0;
+			margin-left: auto;
 		}
 		.dot {
 			position: absolute;
@@ -28,7 +43,7 @@
 </head>
 <body>
 	<nav class="navbar navbar-expand-md bg-dark navbar-dark">
-		<a class="navbar-brand" href="index.html">Atte Piltonen</a>
+		<a class="navbar-brand" href="index.html">MY NAME</a>
 		<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
 			<span class="navbar-toggler-icon"></span>
 		</button>
@@ -48,102 +63,94 @@
 	</nav>
 	<div class="container">
 		<div class="row">
-			<div class="col-md-12">
+			<div class="col-md-13">
 				<h1>BrowserSnake</h1>
-				<div id="game-board"></div>
 			</div>
+		</div>
+		<div class="row justify-content-center">
+			<div id="game-board"></div>
 		</div>
 	</div>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-	<script>
-		var dotSize = 20;
-		var gameSpeed = 200;
-		var direction = 'right';
-		var snake = [{ top: 0, left: 0 }];
-		var apple = null;
-		var gameBoardSize = 300; // same as the #game-board size in CSS
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        let snake = [{ top: 0, left: 0 }];
+        let direction = 'right';
+        let apple = null;
 
-		function updateGame() {
-			var head = Object.assign({}, snake[0]); // copy head
-			switch(direction) {
-				case 'left':
-					head.left -= dotSize;
-					break;
-				case 'up':
-					head.top -= dotSize;
-					break;
-				case 'right':
-					head.left += dotSize;
-					break;
-				case 'down':
-					head.top += dotSize;
-					break;
-			}
+        function collisionWithSelf() {
+            let head = snake[0]; 
+            return snake.some((dot, index) => {
+                if(index === 0) return false;
+                return dot.top === head.top && dot.left === head.left;
+            });
+        }
 
-			// Screen wrapping
-			if(head.left < 0) {
-				head.left = gameBoardSize - dotSize;
-			} else if(head.left === gameBoardSize) {
-				head.left = 0;
-			} else if(head.top < 0) {
-				head.top = gameBoardSize - dotSize;
-			} else if(head.top === gameBoardSize) {
-				head.top = 0;
-			}
+        function collisionWithApple() {
+            let head = snake[0];
+            return apple.top === head.top && apple.left === head.left;
+        }
 
-			snake.unshift(head);
+        function randomApple() {
+            let maxPos = $('#game-board').width() / 20 - 1;
+            return {
+                top: Math.floor(Math.random() * maxPos) * 20,
+                left: Math.floor(Math.random() * maxPos) * 20
+            };
+        }
 
-			if (apple && apple.left === head.left && apple.top === head.top) { // eat the apple
-				apple = null;
-			} else {
-				snake.pop(); // remove the tail
-			}
+        function updateSnake() {
+            let head = Object.assign({}, snake[0]); // copy head
+            switch(direction) {
+                case 'up': head.top -= 20; break;
+                case 'down': head.top += 20; break;
+                case 'left': head.left -= 20; break;
+                case 'right': head.left += 20; break;
+            }
+            if (head.top < 0) head.top = 280;
+            if (head.top > 280) head.top = 0;
+            if (head.left < 0) head.left = 280;
+            if (head.left > 280) head.left = 0;
+            snake.unshift(head);
 
-			if (!apple) { // create new apple
-				apple = {
-					left: Math.floor(Math.random() * (gameBoardSize / dotSize)) * dotSize,
-					top: Math.floor(Math.random() * (gameBoardSize / dotSize)) * dotSize,
-				}
-			}
+            if(apple === null) apple = randomApple();
+            if(collisionWithApple()) apple = randomApple(); // eat the apple
+            else snake.pop(); // remove the tail
 
-			// draw the game
-			var gameBoard = document.getElementById('game-board');
-			gameBoard.innerHTML = '';
-			snake.forEach(function(dot) {
-				var dotElem = document.createElement('div');
-				dotElem.className = 'dot';
-				dotElem.style.left = `${dot.left}px`;
-				dotElem.style.top = `${dot.top}px`;
-				gameBoard.appendChild(dotElem);
-			});
+            if(collisionWithSelf()) {
+                snake = [{ top: 0, left: 0 }]; // reset the game
+                direction = 'right';
+                apple = null;
+            }
+        }
 
-			var appleElem = document.createElement('div');
-			appleElem.className = 'apple';
-			appleElem.style.left = `${apple.left}px`;
-			appleElem.style.top = `${apple.top}px`;
-			gameBoard.appendChild(appleElem);
-		}
+        function updateBoard() {
+            $('#game-board').html('');
+            snake.forEach(function(dot) {
+                $('#game-board').append('<div class="dot" style="top:' + dot.top + 'px; left:' + dot.left + 'px"></div>');
+            });
+            if(apple !== null) {
+                $('#game-board').append('<div class="apple" style="top:' + apple.top + 'px; left:' + apple.left + 'px"></div>');
+            }
+        }
 
-		setInterval(updateGame, gameSpeed);
+        $(document).ready(function() {
+            setInterval(function() {
+                updateSnake();
+                updateBoard();
+            }, 200);
 
-		window.addEventListener('keydown', function(e) {
-			switch(e.key) {
-				case 'ArrowUp':
-					direction = 'up';
-					break;
-				case 'ArrowDown':
-					direction = 'down';
-					break;
-				case 'ArrowLeft':
-					direction = 'left';
-					break;
-				case 'ArrowRight':
-					direction = 'right';
-					break;
-			}
-		});
+            $(window).keydown(function(e) {
+                switch(e.key) {
+                    case 'ArrowUp': if(direction !== 'down') direction = 'up'; break;
+                    case 'ArrowDown': if(direction !== 'up') direction = 'down'; break;
+                    case 'ArrowLeft': if(direction !== 'right') direction = 'left'; break;
+                    case 'ArrowRight': if(direction !== 'left') direction = 'right'; break;
+                }
+            });
+        });
 	</script>
 </body>
 </html>
