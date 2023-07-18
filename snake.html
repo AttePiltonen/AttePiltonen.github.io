@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Atte Piltonen - BrowserSnake</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+	<link rel="stylesheet" href="style.css">
+	<style>
+		body {
+			display: flex;
+			flex-direction: column;
+			min-height: 100vh;
+		}
+		.container {
+			flex-grow: 1;
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+		}
+		#game-board {
+			position: relative;
+			height: 300px;
+			width: 300px;
+			border: 1px solid black;
+			margin-top: 60px; /* Increase this to add more space */
+			margin-right: auto;
+			margin-bottom: 0;
+			margin-left: auto;
+		}
+		.dot {
+			position: absolute;
+			height: 20px;
+			width: 20px;
+			background-color: #000;
+		}
+		.apple {
+			position: absolute;
+			height: 20px;
+			width: 20px;
+			background-color: #f00;
+		}
+	</style>
+</head>
+<body>
+	<nav class="navbar navbar-expand-md bg-dark navbar-dark">
+		<a class="navbar-brand" href="index.html">Atte Piltonen</a>
+		<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
+			<span class="navbar-toggler-icon"></span>
+		</button>
+		<div class="collapse navbar-collapse" id="collapsibleNavbar">
+			<ul class="navbar-nav">
+				<li class="nav-item">
+					<a class="nav-link" href="index.html">Home</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link" href="publications.html">Publications</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link" href="snake.html">BrowserSnake</a>
+				</li>
+			</ul>
+		</div>
+	</nav>
+	<div class="container">
+		<div class="row">
+			<div class="col-md-13">
+				<h1>BrowserSnake</h1>
+			</div>
+		</div>
+		<div class="row justify-content-center">
+			<div id="game-board"></div>
+		</div>
+	</div>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        let snake = [{ top: 0, left: 0 }];
+        let direction = 'right';
+        let apple = null;
+
+        function collisionWithSelf() {
+            let head = snake[0]; 
+            return snake.some((dot, index) => {
+                if(index === 0) return false;
+                return dot.top === head.top && dot.left === head.left;
+            });
+        }
+
+        function collisionWithApple() {
+            let head = snake[0];
+            return apple.top === head.top && apple.left === head.left;
+        }
+
+        function randomApple() {
+            let maxPos = $('#game-board').width() / 20 - 1;
+            let newApple = {};
+            let collision;
+
+            do {
+                collision = false;
+                newApple = {
+                    top: Math.floor(Math.random() * maxPos) * 20,
+                    left: Math.floor(Math.random() * maxPos) * 20
+                };
+
+                for (let dot of snake) {
+                    if (dot.top === newApple.top && dot.left === newApple.left) {
+                        collision = true;
+                        break;
+                    }
+                }
+            } while (collision);
+
+            return newApple;
+                }
+
+        function updateSnake() {
+            let head = Object.assign({}, snake[0]); // copy head
+            switch(direction) {
+                case 'up': head.top -= 20; break;
+                case 'down': head.top += 20; break;
+                case 'left': head.left -= 20; break;
+                case 'right': head.left += 20; break;
+            }
+            if (head.top < 0) head.top = 280;
+            if (head.top > 280) head.top = 0;
+            if (head.left < 0) head.left = 280;
+            if (head.left > 280) head.left = 0;
+            snake.unshift(head);
+
+            if(apple === null) apple = randomApple();
+            if(collisionWithApple()) apple = randomApple(); // eat the apple
+            else snake.pop(); // remove the tail
+
+            if(collisionWithSelf()) {
+                snake = [{ top: 0, left: 0 }]; // reset the game
+                direction = 'right';
+                apple = null;
+            }
+        }
+
+        function updateBoard() {
+            $('#game-board').html('');
+            snake.forEach(function(dot) {
+                $('#game-board').append('<div class="dot" style="top:' + dot.top + 'px; left:' + dot.left + 'px"></div>');
+            });
+            if(apple !== null) {
+                $('#game-board').append('<div class="apple" style="top:' + apple.top + 'px; left:' + apple.left + 'px"></div>');
+            }
+        }
+
+        $(document).ready(function() {
+            setInterval(function() {
+                updateSnake();
+                updateBoard();
+            }, 200);
+
+            $(window).keydown(function(e) {
+                switch(e.key) {
+                    case 'ArrowUp': if(direction !== 'down') direction = 'up'; break;
+                    case 'ArrowDown': if(direction !== 'up') direction = 'down'; break;
+                    case 'ArrowLeft': if(direction !== 'right') direction = 'left'; break;
+                    case 'ArrowRight': if(direction !== 'left') direction = 'right'; break;
+                }
+            });
+        });
+	</script>
+</body>
+</html>
